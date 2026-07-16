@@ -11,14 +11,17 @@ whitenoise==6.6.0
 
 # LangChain & LangGraph
 langchain==0.1.4
-langchain-core==0.1.17
-langchain-community==0.0.13
+langchain-core==0.1.23
+langchain-community==0.0.16
 langgraph==0.0.26
 
 # Google Gemini
 google-generativeai==0.3.2
 
 # Vector Store & Embeddings
+# CPU-only torch keeps the image small enough for free-tier hosts (avoids ~2GB CUDA libs)
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch==2.1.2+cpu
 chromadb==0.4.22
 sentence-transformers==2.3.1
 
