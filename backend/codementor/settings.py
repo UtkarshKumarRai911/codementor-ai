@@ -16,7 +16,10 @@ load_dotenv()
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Security
-SECRET_KEY = os.getenv("SECRET_KEY", "django-insecure-change-me-in-production")
+SECRET_KEY = os.getenv(
+    "SECRET_KEY",
+    os.getenv("DJANGO_SECRET_KEY", "django-insecure-change-me-in-production"),
+)
 DEBUG = os.getenv("DEBUG", "True").lower() in ("true", "1", "yes")
 ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
 
@@ -145,9 +148,11 @@ SIMPLE_JWT = {
 }
 
 # CORS
-CORS_ALLOWED_ORIGINS = os.getenv(
+_cors_origins = os.getenv(
     "CORS_ALLOWED_ORIGINS", "http://localhost:5173,http://localhost:3000"
-).split(",")
+)
+CORS_ALLOW_ALL_ORIGINS = _cors_origins.strip() == "*"
+CORS_ALLOWED_ORIGINS = [] if CORS_ALLOW_ALL_ORIGINS else _cors_origins.split(",")
 CORS_ALLOW_CREDENTIALS = True
 
 # ChromaDB Configuration
@@ -160,7 +165,7 @@ CHROMA_SETTINGS = {
 # Gemini API Configuration
 GEMINI_CONFIG = {
     "API_KEY": os.getenv("GEMINI_API_KEY", ""),
-    "MODEL": os.getenv("GEMINI_MODEL", "gemini-1.5-flash"),
+    "MODEL": os.getenv("GEMINI_MODEL", "gemini-2.5-flash"),
     "MAX_OUTPUT_TOKENS": 4096,
     "TEMPERATURE": 0.3,
     "TOP_P": 0.9,

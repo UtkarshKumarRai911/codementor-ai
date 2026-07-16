@@ -60,10 +60,13 @@ class Query(models.Model):
         ordering = ["-created_at"]
         verbose_name_plural = "queries"
         indexes = [
-            models.Index(fields=["-created_at"]),
-            models.Index(fields=["user", "-created_at"]),
-            models.Index(fields=["query_type"]),
-            models.Index(fields=["status"]),
+            models.Index(fields=["-created_at"], name="api_query_created_idx"),
+            models.Index(
+                fields=["user", "-created_at"],
+                name="api_query_user_created_idx",
+            ),
+            models.Index(fields=["query_type"], name="api_query_type_idx"),
+            models.Index(fields=["status"], name="api_query_status_idx"),
         ]
 
     def __str__(self) -> str:
