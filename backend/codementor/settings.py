@@ -165,7 +165,7 @@ CHROMA_SETTINGS = {
 # Gemini API Configuration
 GEMINI_CONFIG = {
     "API_KEY": os.getenv("GEMINI_API_KEY", ""),
-    "MODEL": os.getenv("GEMINI_MODEL", "gemini-2.5-flash"),
+    "MODEL": os.getenv("GEMINI_MODEL", "gemini-3.5-flash"),
     "MAX_OUTPUT_TOKENS": 4096,
     "TEMPERATURE": 0.3,
     "TOP_P": 0.9,
