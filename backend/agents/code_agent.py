@@ -197,14 +197,17 @@ def generate_response(state: dict) -> dict:
             top_p=settings.GEMINI_CONFIG["TOP_P"],
         )
 
+        # google-generativeai 0.3.x does not support the system_instruction
+        # constructor argument. Include the role instructions in the prompt so
+        # the same behavior works across legacy and newer SDK releases.
         model = genai.GenerativeModel(
             model_name=settings.GEMINI_CONFIG["MODEL"],
             generation_config=generation_config,
-            system_instruction=SYSTEM_PROMPTS.get(query_type, SYSTEM_PROMPTS["debug"]),
         )
 
         # Build and send prompt
-        prompt = build_prompt(state)
+        system_prompt = SYSTEM_PROMPTS.get(query_type, SYSTEM_PROMPTS["debug"])
+        prompt = f"{system_prompt}\n\n{build_prompt(state)}"
         response = model.generate_content(prompt)
 
         # Parse response
