@@ -1,0 +1,122 @@
+[
+  {
+    "title": "0/1 Knapsack Problem",
+    "problem_id": "KNAPSACK01",
+    "difficulty": "Medium",
+    "tags": ["dynamic programming", "knapsack", "optimization"],
+    "problem_statement": "Given N items with weights and values, and a knapsack of capacity W, find the maximum value that can be obtained by selecting items such that total weight does not exceed W.",
+    "approach": "Use dynamic programming with a 2D table dp[i][w] representing the maximum value achievable using the first i items with capacity w. For each item, we either include it (if weight allows) or exclude it, taking the maximum of both choices. The recurrence is: dp[i][w] = max(dp[i-1][w], dp[i-1][w-wt[i]] + val[i]).",
+    "solution_code": "def knapsack(W, weights, values, n):\n    dp = [[0] * (W + 1) for _ in range(n + 1)]\n    for i in range(1, n + 1):\n        for w in range(W + 1):\n            dp[i][w] = dp[i-1][w]\n            if weights[i-1] <= w:\n                dp[i][w] = max(dp[i][w], dp[i-1][w-weights[i-1]] + values[i-1])\n    return dp[n][W]",
+    "complexity_analysis": "Time: O(N*W), Space: O(N*W). Can be optimized to O(W) space by using a 1D array and iterating weights in reverse.",
+    "source": "sample",
+    "url": ""
+  },
+  {
+    "title": "Dijkstra's Shortest Path Algorithm",
+    "problem_id": "DIJKSTRA01",
+    "difficulty": "Medium",
+    "tags": ["graph", "shortest path", "priority queue", "greedy"],
+    "problem_statement": "Given a weighted directed graph with non-negative edge weights, find the shortest path from a source vertex to all other vertices.",
+    "approach": "Use a priority queue (min-heap) to greedily select the unvisited vertex with minimum distance. For each selected vertex, relax all adjacent edges. The key insight is that once a vertex is popped from the priority queue, its shortest distance is finalized.",
+    "solution_code": "import heapq\n\ndef dijkstra(graph, source, n):\n    dist = [float('inf')] * n\n    dist[source] = 0\n    pq = [(0, source)]\n    visited = set()\n    while pq:\n        d, u = heapq.heappop(pq)\n        if u in visited:\n            continue\n        visited.add(u)\n        for v, weight in graph[u]:\n            if dist[u] + weight < dist[v]:\n                dist[v] = dist[u] + weight\n                heapq.heappush(pq, (dist[v], v))\n    return dist",
+    "complexity_analysis": "Time: O((V + E) log V) with binary heap. Space: O(V + E). Using Fibonacci heap gives O(V log V + E) but is rarely used in practice.",
+    "source": "sample",
+    "url": ""
+  },
+  {
+    "title": "Binary Search on Answer",
+    "problem_id": "BSEARCH01",
+    "difficulty": "Medium-Hard",
+    "tags": ["binary search", "greedy", "optimization"],
+    "problem_statement": "Given a set of constraints, find the minimum or maximum value of some parameter such that a feasibility condition is satisfied. Example: Find the minimum maximum distance when placing K items among N positions.",
+    "approach": "Instead of directly finding the optimal value, binary search on the answer space. For each candidate answer mid, check if it's feasible using a greedy or other efficient validation function. If feasible, try a better answer; otherwise, adjust the search range. The check function must be monotonic.",
+    "solution_code": "def binary_search_on_answer(positions, k):\n    positions.sort()\n    lo, hi = 0, positions[-1] - positions[0]\n    \n    def is_feasible(min_dist):\n        count = 1\n        last = positions[0]\n        for pos in positions[1:]:\n            if pos - last >= min_dist:\n                count += 1\n                last = pos\n        return count >= k\n    \n    while lo < hi:\n        mid = (lo + hi + 1) // 2\n        if is_feasible(mid):\n            lo = mid\n        else:\n            hi = mid - 1\n    return lo",
+    "complexity_analysis": "Time: O(N log N + N log(max_range)) where N is array size and max_range is the answer space. Space: O(1) additional.",
+    "source": "sample",
+    "url": ""
+  },
+  {
+    "title": "Segment Tree Range Query",
+    "problem_id": "SEGTREE01",
+    "difficulty": "Hard",
+    "tags": ["segment tree", "range query", "data structure"],
+    "problem_statement": "Given an array of N elements, support two operations: update a single element, and query the sum/min/max over a range [l, r] efficiently.",
+    "approach": "Build a segment tree where each node stores the aggregate for its range. Updates propagate up from the leaf. Queries split the range and combine results from relevant subtrees. Use lazy propagation for range updates.",
+    "solution_code": "class SegmentTree:\n    def __init__(self, arr):\n        self.n = len(arr)\n        self.tree = [0] * (4 * self.n)\n        self.build(arr, 1, 0, self.n - 1)\n    \n    def build(self, arr, node, start, end):\n        if start == end:\n            self.tree[node] = arr[start]\n        else:\n            mid = (start + end) // 2\n            self.build(arr, 2*node, start, mid)\n            self.build(arr, 2*node+1, mid+1, end)\n            self.tree[node] = self.tree[2*node] + self.tree[2*node+1]\n    \n    def update(self, node, start, end, idx, val):\n        if start == end:\n            self.tree[node] = val\n        else:\n            mid = (start + end) // 2\n            if idx <= mid:\n                self.update(2*node, start, mid, idx, val)\n            else:\n                self.update(2*node+1, mid+1, end, idx, val)\n            self.tree[node] = self.tree[2*node] + self.tree[2*node+1]\n    \n    def query(self, node, start, end, l, r):\n        if r < start or end < l:\n            return 0\n        if l <= start and end <= r:\n            return self.tree[node]\n        mid = (start + end) // 2\n        return self.query(2*node, start, mid, l, r) + self.query(2*node+1, mid+1, end, l, r)",
+    "complexity_analysis": "Time: O(N) build, O(log N) per update and query. Space: O(N).",
+    "source": "sample",
+    "url": ""
+  },
+  {
+    "title": "Two Sum Problem",
+    "problem_id": "TWOSUM01",
+    "difficulty": "Easy",
+    "tags": ["hash map", "array", "two pointers"],
+    "problem_statement": "Given an array of integers and a target sum, find two numbers that add up to the target. Return their indices.",
+    "approach": "Use a hash map to store each number's index as we iterate. For each element, check if (target - current) exists in the map. This gives O(1) lookup per element. Alternative: sort and use two pointers for O(n log n) without extra space.",
+    "solution_code": "def two_sum(nums, target):\n    seen = {}\n    for i, num in enumerate(nums):\n        complement = target - num\n        if complement in seen:\n            return [seen[complement], i]\n        seen[num] = i\n    return []",
+    "complexity_analysis": "Hash map approach: Time O(N), Space O(N). Two pointer approach: Time O(N log N), Space O(1).",
+    "source": "sample",
+    "url": ""
+  },
+  {
+    "title": "DFS and BFS Graph Traversal",
+    "problem_id": "DFSBFS01",
+    "difficulty": "Easy-Medium",
+    "tags": ["graph", "DFS", "BFS", "traversal"],
+    "problem_statement": "Given a graph, traverse all reachable vertices from a source using Depth-First Search and Breadth-First Search. Detect connected components and cycles.",
+    "approach": "DFS uses a stack (or recursion) to explore as deep as possible before backtracking. BFS uses a queue to explore level by level. Both maintain a visited set to avoid revisiting nodes. DFS is useful for topological sort, cycle detection. BFS finds shortest paths in unweighted graphs.",
+    "solution_code": "from collections import deque\n\ndef bfs(graph, source, n):\n    visited = [False] * n\n    dist = [-1] * n\n    queue = deque([source])\n    visited[source] = True\n    dist[source] = 0\n    while queue:\n        u = queue.popleft()\n        for v in graph[u]:\n            if not visited[v]:\n                visited[v] = True\n                dist[v] = dist[u] + 1\n                queue.append(v)\n    return dist\n\ndef dfs(graph, source, n):\n    visited = [False] * n\n    order = []\n    def _dfs(u):\n        visited[u] = True\n        order.append(u)\n        for v in graph[u]:\n            if not visited[v]:\n                _dfs(v)\n    _dfs(source)\n    return order",
+    "complexity_analysis": "Time: O(V + E) for both DFS and BFS. Space: O(V) for visited array and queue/stack.",
+    "source": "sample",
+    "url": ""
+  },
+  {
+    "title": "Longest Increasing Subsequence",
+    "problem_id": "LIS01",
+    "difficulty": "Medium",
+    "tags": ["dynamic programming", "binary search", "subsequence"],
+    "problem_statement": "Given an array of N integers, find the length of the longest strictly increasing subsequence.",
+    "approach": "O(N log N) approach: Maintain a tails array where tails[i] is the smallest tail element for increasing subsequences of length i+1. For each element, binary search for its position in tails. If it extends the longest subsequence, append it; otherwise, replace the appropriate element.",
+    "solution_code": "import bisect\n\ndef lis(arr):\n    tails = []\n    for num in arr:\n        pos = bisect.bisect_left(tails, num)\n        if pos == len(tails):\n            tails.append(num)\n        else:\n            tails[pos] = num\n    return len(tails)",
+    "complexity_analysis": "Time: O(N log N). Space: O(N). The DP approach is O(N^2) time, O(N) space.",
+    "source": "sample",
+    "url": ""
+  },
+  {
+    "title": "Union-Find (Disjoint Set Union)",
+    "problem_id": "DSU01",
+    "difficulty": "Medium",
+    "tags": ["union-find", "disjoint set", "graph", "connectivity"],
+    "problem_statement": "Implement a data structure to efficiently track connected components in an undirected graph. Support union and find operations.",
+    "approach": "Use path compression in find() and union by rank/size in union() for near-constant amortized time. Path compression flattens the tree during find. Union by rank attaches the shorter tree under the root of the taller tree.",
+    "solution_code": "class UnionFind:\n    def __init__(self, n):\n        self.parent = list(range(n))\n        self.rank = [0] * n\n        self.components = n\n    \n    def find(self, x):\n        if self.parent[x] != x:\n            self.parent[x] = self.find(self.parent[x])\n        return self.parent[x]\n    \n    def union(self, x, y):\n        px, py = self.find(x), self.find(y)\n        if px == py:\n            return False\n        if self.rank[px] < self.rank[py]:\n            px, py = py, px\n        self.parent[py] = px\n        if self.rank[px] == self.rank[py]:\n            self.rank[px] += 1\n        self.components -= 1\n        return True\n    \n    def connected(self, x, y):\n        return self.find(x) == self.find(y)",
+    "complexity_analysis": "Time: O(alpha(N)) per operation (inverse Ackermann, practically constant). Space: O(N).",
+    "source": "sample",
+    "url": ""
+  },
+  {
+    "title": "Sliding Window Maximum",
+    "problem_id": "SLIDWIN01",
+    "difficulty": "Medium-Hard",
+    "tags": ["sliding window", "deque", "monotonic queue"],
+    "problem_statement": "Given an array of N integers and a window size K, find the maximum element in each window as it slides from left to right.",
+    "approach": "Use a monotonic decreasing deque that stores indices. The front of the deque always contains the index of the maximum element in the current window. When sliding the window: remove indices that fall outside the window from the front, and remove smaller elements from the back before adding the new element.",
+    "solution_code": "from collections import deque\n\ndef sliding_window_max(nums, k):\n    result = []\n    dq = deque()  # stores indices\n    for i, num in enumerate(nums):\n        # Remove indices outside window\n        while dq and dq[0] < i - k + 1:\n            dq.popleft()\n        # Remove smaller elements from back\n        while dq and nums[dq[-1]] <= num:\n            dq.pop()\n        dq.append(i)\n        # Window is fully formed\n        if i >= k - 1:\n            result.append(nums[dq[0]])\n    return result",
+    "complexity_analysis": "Time: O(N) - each element is added and removed from deque at most once. Space: O(K) for the deque.",
+    "source": "sample",
+    "url": ""
+  },
+  {
+    "title": "Topological Sort (Kahn's Algorithm)",
+    "problem_id": "TOPSORT01",
+    "difficulty": "Medium",
+    "tags": ["topological sort", "DAG", "BFS", "graph"],
+    "problem_statement": "Given a Directed Acyclic Graph (DAG) with V vertices and E edges, find a topological ordering of vertices such that for every directed edge (u, v), vertex u appears before v.",
+    "approach": "Kahn's Algorithm uses BFS with in-degree tracking. Start with all vertices having in-degree 0. Process each such vertex, reducing in-degrees of neighbors. If a neighbor's in-degree becomes 0, add it to the queue. If the result contains fewer than V vertices, the graph has a cycle.",
+    "solution_code": "from collections import deque\n\ndef topological_sort(graph, n):\n    in_degree = [0] * n\n    for u in range(n):\n        for v in graph[u]:\n            in_degree[v] += 1\n    \n    queue = deque([u for u in range(n) if in_degree[u] == 0])\n    order = []\n    \n    while queue:\n        u = queue.popleft()\n        order.append(u)\n        for v in graph[u]:\n            in_degree[v] -= 1\n            if in_degree[v] == 0:\n                queue.append(v)\n    \n    if len(order) != n:\n        return []  # Cycle detected\n    return order",
+    "complexity_analysis": "Time: O(V + E). Space: O(V) for in-degree array and queue.",
+    "source": "sample",
+    "url": ""
+  }
+]
