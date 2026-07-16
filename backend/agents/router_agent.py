@@ -114,7 +114,9 @@ def classify_with_llm(question: str, code_snippet: str, error_message: str) -> s
             return None
 
         genai.configure(api_key=api_key)
-        model = genai.GenerativeModel("gemini-1.5-flash")
+        model = genai.GenerativeModel(
+            settings.GEMINI_CONFIG.get("MODEL", "gemini-3.5-flash")
+        )
 
         prompt = f"""Classify the following coding question into exactly one category.
 Categories: debug, explain, generate, optimize

@@ -8,6 +8,18 @@ from django.conf import settings
 
 logger = logging.getLogger(__name__)
 
+CURRENT_GEMINI_MODEL = "gemini-3.5-flash"
+
+
+def _is_model_unavailable_error(error: Exception) -> bool:
+    """Return whether Gemini rejected an unavailable or retired model."""
+    message = str(error).lower()
+    return (
+        ("404" in message or "not found" in message or "no longer available" in message)
+        and ("model" in message or "models/" in message)
+    )
+
+
 # System prompts for different query types
 SYSTEM_PROMPTS = {
     "debug": """You are an expert debugging assistant. Your task is to:
@@ -200,15 +212,40 @@ def generate_response(state: dict) -> dict:
         # google-generativeai 0.3.x does not support the system_instruction
         # constructor argument. Include the role instructions in the prompt so
         # the same behavior works across legacy and newer SDK releases.
-        model = genai.GenerativeModel(
-            model_name=settings.GEMINI_CONFIG["MODEL"],
-            generation_config=generation_config,
-        )
-
-        # Build and send prompt
         system_prompt = SYSTEM_PROMPTS.get(query_type, SYSTEM_PROMPTS["debug"])
         prompt = f"{system_prompt}\n\n{build_prompt(state)}"
-        response = model.generate_content(prompt)
+
+        configured_model = settings.GEMINI_CONFIG["MODEL"]
+        model_candidates = [configured_model]
+        if configured_model != CURRENT_GEMINI_MODEL:
+            model_candidates.append(CURRENT_GEMINI_MODEL)
+
+        response = None
+        model_used = configured_model
+        for model_name in model_candidates:
+            try:
+                model = genai.GenerativeModel(
+                    model_name=model_name,
+                    generation_config=generation_config,
+                )
+                response = model.generate_content(prompt)
+                model_used = model_name
+                break
+            except Exception as model_error:
+                if (
+                    model_name != CURRENT_GEMINI_MODEL
+                    and _is_model_unavailable_error(model_error)
+                ):
+                    logger.warning(
+                        "Configured Gemini model %s is unavailable; retrying with %s",
+                        model_name,
+                        CURRENT_GEMINI_MODEL,
+                    )
+                    continue
+                raise
+
+        if response is None:
+            raise RuntimeError("Gemini did not return a response")
 
         # Parse response
         parsed = parse_response(response.text)
@@ -230,7 +267,7 @@ def generate_response(state: dict) -> dict:
             "fixed_code": parsed["fixed_code"],
             "similar_problems": parsed["similar_problems"],
             "tokens_used": tokens_used,
-            "model_used": settings.GEMINI_CONFIG["MODEL"],
+            "model_used": model_used,
         }
 
     except Exception as e:

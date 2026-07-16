@@ -23,7 +23,7 @@ Django REST API -> React frontend
 | Component | Technology |
 |-----------|-----------|
 | Backend | Django 5.0 + Django REST Framework |
-| LLM | Google Gemini 1.5 Flash API |
+| LLM | Google Gemini 3.5 Flash API |
 | Orchestration | LangChain + LangGraph (multi-agent) |
 | Vector DB | ChromaDB (persistent local storage) |
 | Embeddings | sentence-transformers (all-MiniLM-L6-v2) |
@@ -38,7 +38,7 @@ Django REST API -> React frontend
 - **RAG-Grounded Responses**: All answers grounded in retrieved competitive programming context
 - **Hallucination Reduction**: ~60% reduction vs baseline GPT-4o prompting (measured on 200-question eval set)
 - **Fast Retrieval**: <100ms retrieval latency over 50,000+ editorial chunks
-- **Cost Efficient**: <$0.01 per query using Gemini 1.5 Flash
+- **Cost Efficient**: Optimized inference using Gemini 3.5 Flash
 - **JWT Authentication**: Secure API with token-based auth
 - **Query History**: Track all past interactions with full context
 
@@ -176,8 +176,8 @@ CodeMentor AI - Multi-Agent Coding Assistant    Django, LangGraph, ChromaDB, Gem
 - Indexed 50,000+ Codeforces editorial passages into ChromaDB using
   sentence-transformers embeddings, achieving <100ms retrieval latency
 
-- Deployed on Railway with Docker; integrated Gemini 1.5 Flash for cost-efficient
-  inference at <$0.01 per query
+- Deployed on Railway with Docker; integrated Gemini 3.5 Flash for efficient
+  coding assistance
 ```
 
 ## License
